@@ -29,15 +29,15 @@ func main() {
 
 	for {
 		buf := make([]byte, maxDnsPacketSize)
-		readbyte, address, err := packet.ReadFrom(buf)
+		readbyte, clientAddr, err := packet.ReadFrom(buf)
 		if err != nil {
 			log.Fatal(err)
 		}
-		go handleDnsRequest(packet, address, buf[:readbyte])
+		go handleDnsRequest(packet, clientAddr, buf[:readbyte], *resolver)
 	}
 }
 
-func handleDnsRequest(packet net.PacketConn, address net.Addr, data []byte) {
+func handleDnsRequest(packet net.PacketConn, address net.Addr, data []byte, resolver string) {
 	//log.Println(data)
 	name, err := dnsmsg.GetQuestionName(data)
 	name = strings.TrimRight(name, ".")
@@ -49,7 +49,7 @@ func handleDnsRequest(packet net.PacketConn, address net.Addr, data []byte) {
 		return
 	}
 
-	response, err := dnsmsg.Send("8.8.8.8:53", data)
+	response, err := dnsmsg.Send(resolver, data)
 	if err != nil {
 		log.Fatal(err)
 	}
