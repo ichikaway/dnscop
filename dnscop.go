@@ -1,13 +1,12 @@
 package main
 
 import (
+	"dnscop/block"
 	"dnscop/dnsmsg"
 	"flag"
 	"log"
 	"net"
-	"regexp"
 	"strings"
-	"time"
 )
 
 const maxDnsPacketSize = 512
@@ -44,7 +43,7 @@ func handleDnsRequest(packet net.PacketConn, address net.Addr, data []byte, reso
 	name = strings.TrimRight(name, ".")
 	log.Println(name)
 
-	if isBlock(name) {
+	if block.IsBlock(name) {
 		log.Println("  ** block youtube **")
 		return
 	}
@@ -54,18 +53,4 @@ func handleDnsRequest(packet net.PacketConn, address net.Addr, data []byte, reso
 		log.Fatal(err)
 	}
 	packet.WriteTo(response, address)
-}
-
-/**
- * forbid watching youtube video later than 20:05
- */
-func isBlock(name string) bool {
-	now := time.Now()
-	if now.Hour() > 20 || (now.Hour() == 20 && now.Minute() >= 5){
-		r,_ := regexp.Compile("www.youtube.com|youtube.com|i.ytimg.com|.+.googlevideo.com")
-		if r.MatchString(name) {
-			return true
-		}
-	}
-	return false
 }
