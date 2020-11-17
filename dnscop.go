@@ -41,7 +41,8 @@ func handleDnsRequest(packet net.PacketConn, address net.Addr, data []byte, reso
 	//log.Println(data)
 	name, err := dnsmsg.GetQuestionName(data)
 	name = strings.TrimRight(name, ".")
-	log.Println(name)
+
+	log.Println(name + " " + address.String())
 
 	if block.IsBlock(name) {
 		log.Println("  ** block youtube **")
