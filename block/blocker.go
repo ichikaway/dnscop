@@ -13,9 +13,25 @@ func IsBlock(name string, conf *config.UserConfig) bool {
 	now := time.Now()
 	nowInt := hourDateToInt(now.Hour(), now.Minute())
 	from := conf.GetFromTime()
-	if from < nowInt {
+	to := conf.GetToTime()
+	if between(from, to, nowInt) {
 		r, _ := regexp.Compile(conf.GetCondition())
 		if r.MatchString(name) {
+			return true
+		}
+	}
+	return false
+}
+
+func between(from int, to int, now int) bool {
+	if from < now && now < to {
+		return true
+	}
+	if to < from { //ex. to is morning time
+		if from < now {
+			return true
+		}
+		if now < to {
 			return true
 		}
 	}
