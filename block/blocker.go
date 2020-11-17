@@ -1,6 +1,7 @@
 package block
 
 import (
+	"dnscop/config"
 	"regexp"
 	"time"
 )
@@ -8,14 +9,12 @@ import (
 /**
  * forbid watching youtube video later than 20:05
  */
-func IsBlock(name string) bool {
+func IsBlock(name string, conf *config.UserConfig) bool {
 	now := time.Now()
 	nowInt := hourDateToInt(now.Hour(), now.Minute())
-	limitHour := 20
-	limitMin := 0
-	limitInt := hourDateToInt(limitHour, limitMin)
-	if nowInt > limitInt {
-		r, _ := regexp.Compile("www.youtube.com|youtube.com|i.ytimg.com|.+.googlevideo.com")
+	from := conf.GetFromTime()
+	if from < nowInt {
+		r, _ := regexp.Compile(conf.GetCondition())
 		if r.MatchString(name) {
 			return true
 		}

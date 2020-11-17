@@ -2,6 +2,7 @@ package main
 
 import (
 	"dnscop/block"
+	"dnscop/config"
 	"dnscop/dnsmsg"
 	"flag"
 	"log"
@@ -27,24 +28,26 @@ func main() {
 	}
 	defer packet.Close()
 
+	conf := config.NewUserConfig("www.youtube.com|youtube.com|i.ytimg.com|.+.googlevideo.com", "09:00-08:00")
+
 	for {
 		buf := make([]byte, maxDnsPacketSize)
 		readbyte, clientAddr, err := packet.ReadFrom(buf)
 		if err != nil {
 			log.Fatal(err)
 		}
-		go handleDnsRequest(packet, clientAddr, buf[:readbyte], *resolver)
+		go handleDnsRequest(packet, clientAddr, buf[:readbyte], *resolver, conf)
 	}
 }
 
-func handleDnsRequest(packet net.PacketConn, address net.Addr, data []byte, resolver string) {
+func handleDnsRequest(packet net.PacketConn, address net.Addr, data []byte, resolver string, conf *config.UserConfig) {
 	//log.Println(data)
 	name, err := dnsmsg.GetQuestionName(data)
 	name = strings.TrimRight(name, ".")
 
 	log.Println(name + " " + address.String())
 
-	if block.IsBlock(name) {
+	if block.IsBlock(name, conf) {
 		log.Println("  ** block youtube **")
 		return
 	}
