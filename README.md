@@ -18,3 +18,4 @@ Default value
 - Listen IP:Port is "0.0.0.0:53"
 - Resolver is "8.8.8.8:53"
 - Between is "20:00-23:00"
+- block-list is "www.youtube.com|youtube.com|i.ytimg.com|.+.googlevideo.com"
